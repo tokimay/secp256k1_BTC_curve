@@ -1,6 +1,7 @@
 usage:
 
 ````python
-from secp256k1.py import getPublicKeyCoortinate
+from secp256k1 import getPublicKeyCoortinate
 
-public_key = getPublicKeyCoortinate(privateKey)
+public_key = getPublicKeyCoortinate(YOUR_PRIVATE_KEY)
+````
