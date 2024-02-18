@@ -1,5 +1,4 @@
 usage:
-
 ````python
 from secp256k1 import getPublicKeyCoortinate
 
