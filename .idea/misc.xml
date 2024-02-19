@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.10 (Secp256k1_curve)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (Secp256k1_curve)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (Secp256k1_BTC_curve)" project-jdk-type="Python SDK" />
   <component name="accountSettings">
     <option name="activeRegion" value="us-east-1" />
     <option name="recentlyUsedRegions">
