@@ -80,7 +80,7 @@ def ___scalar_multiply(point: tuple, repeat: int) -> tuple:
     return point_double
 
 
-def getPublicKeyCoortinate(privateKey):
+def getPublicKeyCoordinate(privateKey):
     pk = ___scalar_multiply(point=___base, repeat=privateKey)
     if ___isOnCurve(___base) and ___isOnCurve(pk):
         return pk
