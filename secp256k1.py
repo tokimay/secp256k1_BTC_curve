@@ -47,7 +47,7 @@ def ___add(pointA: tuple, pointB: tuple) -> tuple:
     y = (slope * (pointA[0] - x) - pointA[1]) % ___mod
     newPoint = (x, y)
 
-    return newPoint  # Point(x, y, self.curve_config)
+    return newPoint  # Point(x, y)
 
 
 def __multiply(pointA: tuple, base: tuple, repeat: int) -> tuple:
@@ -86,3 +86,23 @@ def getPublicKeyCoordinate(privateKey):
         return pk
     else:
         return None
+
+
+def multipy(repeat, point):
+    pk = ___scalar_multiply(point=point, repeat=repeat)
+    if ___isOnCurve(___base) and ___isOnCurve(pk):
+        return pk
+    else:
+        return None
+
+
+def add(pointA, pointB):
+    return ___add(pointA, pointB)
+
+
+def p():
+    return ___mod
+
+
+def g():
+    return ___base
