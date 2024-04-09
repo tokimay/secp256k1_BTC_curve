@@ -80,29 +80,29 @@ def ___scalar_multiply(point: tuple, repeat: int) -> tuple:
     return point_double
 
 
-def getPublicKeyCoordinate(privateKey):
+def getPublicKeyCoordinate(privateKey: int) -> tuple:
     pk = ___scalar_multiply(point=___base, repeat=privateKey)
     if ___isOnCurve(___base) and ___isOnCurve(pk):
         return pk
     else:
-        return None
+        return ()
 
 
-def multipy(repeat, point):
+def multipy(repeat: int, point: tuple) -> tuple:
     pk = ___scalar_multiply(point=point, repeat=repeat)
     if ___isOnCurve(___base) and ___isOnCurve(pk):
         return pk
     else:
-        return None
+        return ()
 
 
-def add(pointA, pointB):
+def add(pointA: tuple, pointB: tuple) -> tuple:
     return ___add(pointA, pointB)
 
 
-def p():
-    return ___mod
+def n() -> int:
+    return ___n
 
 
-def g():
+def g() -> tuple:
     return ___base
