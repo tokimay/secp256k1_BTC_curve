@@ -15,7 +15,7 @@ print(public_key)
 ````
 
 Result: <br />
-````shell
+````text
 44866585412763965536104885134689245299327962125733546419544817742211528769243
 
 Process finished with exit code 0
