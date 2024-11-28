@@ -75,23 +75,19 @@ def __scalar_multiply(point: tuple[int, int], repeat: int) -> tuple[int, int]:
 def __is_equal_to(point_a: tuple[int, int], point_b: tuple[int, int]):
     return point_a[0] == point_b[0] and point_a[1] == point_b[1]
 
-def __private_key(private_key: str or int) -> int:
-    if isinstance(private_key, str):
+
+def __normalize(hex_val: str or int) -> int:
+    if isinstance(hex_val, str):
         try:
-            if private_key.startswith('0x') or private_key.startswith('0X'):
-                private_key = private_key[2:]
-            if len(private_key) != 32 * 2:
-                print('Private_key key length is not math bitcoin standards.')
-            __pk = int(private_key, 16)
-            return __pk
+            int_val = int(hex_val, 16)
+            return int_val
         except TypeError:
             raise TypeError
-    elif isinstance(private_key, int):
-        if len(hex(private_key)[2:]) != 32 * 2:
-            print('Private_key key length is not math bitcoin standards.')
-        return private_key
+    elif isinstance(hex_val, int):
+        return hex_val
     else:
         raise TypeError
+
 
 def __uncompressed(pub_key_coordinate: tuple[int, int]) -> str:
     x = hex(pub_key_coordinate[0])[2:]
@@ -100,6 +96,7 @@ def __uncompressed(pub_key_coordinate: tuple[int, int]) -> str:
     if len(uc_pk) != (65 * 2):
         print('Public key length is not math bitcoin standards.')
     return uc_pk
+
 
 def __compressed(pub_key_coordinate: tuple[int, int]) -> str:
     x = hex(pub_key_coordinate[0])[2:]
@@ -115,7 +112,9 @@ def __compressed(pub_key_coordinate: tuple[int, int]) -> str:
 
 def public_key_coordinate(private_key: str or int) -> tuple[int, int] or None:
     try:
-        private_key = __private_key(private_key)
+        private_key = __normalize(private_key)
+        if len(hex(private_key)[2:]) != 32 * 2:
+            print('Private key length is not math bitcoin standards.')
         pk = __scalar_multiply(point=__BASE, repeat=private_key)
         if not __is_on_curve(pk):
             raise ValueError
@@ -124,9 +123,12 @@ def public_key_coordinate(private_key: str or int) -> tuple[int, int] or None:
         print(str(er))
         return None
 
+
 def uncompressed_public_key(private_key: str or int) -> str or None:
     try:
-        private_key = __private_key(private_key)
+        private_key = __normalize(private_key)
+        if len(hex(private_key)[2:]) != 32 * 2:
+            print('Private key length is not math bitcoin standards.')
         pk = __scalar_multiply(point=__BASE, repeat=private_key)
         if not __is_on_curve(pk):
             raise ValueError
@@ -135,9 +137,12 @@ def uncompressed_public_key(private_key: str or int) -> str or None:
         print(str(er))
         return None
 
+
 def compressed_public_key(private_key: str or int) -> str or None:
     try:
-        private_key = __private_key(private_key)
+        private_key = __normalize(private_key)
+        if len(hex(private_key)[2:]) != 32 * 2:
+            print('Private key length is not math bitcoin standards.')
         pk = __scalar_multiply(point=__BASE, repeat=private_key)
         if not __is_on_curve(pk):
             raise ValueError
@@ -145,6 +150,7 @@ def compressed_public_key(private_key: str or int) -> str or None:
     except Exception as er:
         print(str(er))
         return None
+
 
 def multipy(repeat: int, point: tuple[int, int]) -> tuple[int, int] or None:
     try:
