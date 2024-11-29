@@ -1,4 +1,24 @@
 
+# Elliptic Curve Cryptography
+### ECC
+
+ECC is commonly used for cryptology purposes. </br>
+It focuses on asymmetric cryptography using pairs of public and private keys. </br>
+This type of cryptography is used for encryption and decryption of data, authentication, and digital signatures. <br />
+Bitcoin and other cryptocurrencies use the private key and public key for digital signatures and validating transactions.<br />
+ </br>
+***Private key:**  </br>
+The private key is just a big and random number. </br>
+To generate a secure private key, you can use this [random entropy creator](https://github.com/tokimay/random_entropy).
+ </br>
+ </br>
+***Public key:**  </br>
+The public key is a coordinate calculated on the curve algorithm based on the private key.  </br>
+There are 3 types of public key that are used:
++ Public key coordinate: a tuple containing x and y of coordinate
++ Un compressed public key: '04' + hex(x) + hex(y)
++ Compressed public key: '02' for even or '03' for odd x + hex(x)
+
 Example usage: <br />
 ````python 
 import secp256k1
