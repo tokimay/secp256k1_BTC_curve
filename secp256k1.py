@@ -1,15 +1,15 @@
 
 __A = 0
 __B = 7
-__MOD = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
-__BASE = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
-          0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8)
+__P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+__G = (0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,
+       0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8)
 __N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
 
 
 def __is_on_curve(point: tuple[int, int]) -> bool:
     # if y ** 2 mod p = x **3 + ax + b mod p
-    if (point[1] ** 2) % __MOD == ((point[0] ** 3) + (__A * point[0]) + __B) % __MOD:
+    if (point[1] ** 2) % __P == ((point[0] ** 3) + (__A * point[0]) + __B) % __P:
         return True
     else:
         print('Point:')
@@ -19,11 +19,11 @@ def __is_on_curve(point: tuple[int, int]) -> bool:
 
 
 def __get_inverse(_n):
-    return pow(_n, -1, __MOD)
+    return pow(_n, -1, __P)
 
 
 def __get_points_inverse(_p: tuple[int, int]) -> tuple[int, int]:
-    _y = (_p[1] * -1) % __MOD
+    _y = (_p[1] * -1) % __P
     p_1 = (_p[0], _y)
     return p_1
 
@@ -31,12 +31,12 @@ def __get_points_inverse(_p: tuple[int, int]) -> tuple[int, int]:
 def __add(point_a: tuple[int, int], point_b: tuple[int, int]) -> tuple[int, int]:
     if __is_equal_to(point_a, point_b):  # is multiple
         # a = 0
-        slope = ((3 * point_a[0] ** 2) + __A) * __get_inverse(_n=(2 * point_a[1])) % __MOD
+        slope = ((3 * point_a[0] ** 2) + __A) * __get_inverse(_n=(2 * point_a[1])) % __P
     else:  # A is base B is poit
-        slope = (point_b[1] - point_a[1]) * __get_inverse(_n=point_b[0] - point_a[0]) % __MOD
+        slope = (point_b[1] - point_a[1]) * __get_inverse(_n=point_b[0] - point_a[0]) % __P
 
-    x = (slope ** 2 - point_a[0] - point_b[0]) % __MOD
-    y = (slope * (point_a[0] - x) - point_a[1]) % __MOD
+    x = (slope ** 2 - point_a[0] - point_b[0]) % __P
+    y = (slope * (point_a[0] - x) - point_a[1]) % __P
     new_point = (x, y)
 
     return new_point  # Point(x, y)
@@ -109,13 +109,89 @@ def __compressed(pub_key_coordinate: tuple[int, int]) -> str:
         print('Public key length is not math bitcoin standards.')
     return uc_pk
 
+def __legendre(a, p):
+    return pow(a, (p - 1) // 2, p)
+
+def __tonelli(y2_modular):
+    assert __legendre(y2_modular, __P) == 1, "not a square (mod p)"
+    q = __P - 1
+    s = 0
+    while q % 2 == 0:
+        q //= 2
+        s += 1
+    if s == 1:
+        return pow(y2_modular, (__P + 1) // 4, __P)
+    for z in range(2, __P):
+        if __P - 1 == __legendre(z, __P):
+            break
+    c = pow(z, q, __P)
+    r = pow(y2_modular, (q + 1) // 2, __P)
+    t = pow(y2_modular, q, __P)
+    m = s
+    # t2 = 0
+    while (t - 1) % __P != 0:
+        t2 = (t * t) % __P
+        for i in range(1, m):
+            if (t2 - 1) % __P == 0:
+                break
+            t2 = (t2 * t2) % __P
+        b = pow(c, 1 << (m - i - 1), __P)
+        r = (r * b) % __P
+        c = (b * b) % __P
+        t = (t * c) % __P
+        m = i
+    return r
+
+def __get_y(x: int):
+    y2_modular = ((x ** 3) + 7) % __P
+    y = __tonelli(y2_modular)
+    return y
+
+def recover_public_key_coordinate(pub_key: str or int) -> tuple[int, int]:
+    if isinstance(pub_key, str):
+        pub_key = pub_key[2:] # remove prefix '02' or '03' or '04
+    elif isinstance(pub_key, int):
+        pub_key = hex(pub_key)[3:] # remove '0x' and prefix '2' or '3' or '4'
+    else:
+        raise ValueError
+
+    pub_key = hex(__normalize(pub_key))[2:]
+    x = None
+    y = None
+    if len(pub_key) == (32 * 2): # compressed
+        x = int(pub_key, 16)
+        y = __get_y(x)
+    elif len(pub_key) == (64 * 2): # uncompressed
+        x = int(pub_key[:64], 16)
+        y = int(pub_key[64:], 16)
+    else:
+        print('public key length is not math bitcoin standards.')
+    return x, y
+
+def de_compressed(compressed_pk: str or int) -> str:
+    if isinstance(compressed_pk, str):
+        compressed_pk = compressed_pk[2:] # remove prefix '02' or '03'
+    elif isinstance(compressed_pk, int):
+        compressed_pk = hex(compressed_pk)[3:] # remove '0x' and prefix '2' or '3'
+    else:
+        raise ValueError
+    if len(compressed_pk) != (32 * 2):
+        print('Compressed public key length is not math bitcoin standards.')
+
+    x = __normalize(compressed_pk)
+    y = __get_y(x)
+    uc_pk = '04' + hex(x)[2:] + hex(y)[2:]
+    if len(uc_pk) != (65 * 2):
+        print('Uncompressed public key length is not math bitcoin standards.')
+    return uc_pk
+
 
 def public_key_coordinate(private_key: str or int) -> tuple[int, int] or None:
     try:
         private_key = __normalize(private_key)
         if len(hex(private_key)[2:]) != 32 * 2:
             print('Private key length is not math bitcoin standards.')
-        pk = __scalar_multiply(point=__BASE, repeat=private_key)
+        pk = __scalar_multiply(point=__G, repeat=private_key)
         if not __is_on_curve(pk):
             raise ValueError
         return pk
@@ -129,7 +205,7 @@ def uncompressed_public_key(private_key: str or int) -> str or None:
         private_key = __normalize(private_key)
         if len(hex(private_key)[2:]) != 32 * 2:
             print('Private key length is not math bitcoin standards.')
-        pk = __scalar_multiply(point=__BASE, repeat=private_key)
+        pk = __scalar_multiply(point=__G, repeat=private_key)
         if not __is_on_curve(pk):
             raise ValueError
         return __uncompressed(pk)
@@ -143,7 +219,7 @@ def compressed_public_key(private_key: str or int) -> str or None:
         private_key = __normalize(private_key)
         if len(hex(private_key)[2:]) != 32 * 2:
             print('Private key length is not math bitcoin standards.')
-        pk = __scalar_multiply(point=__BASE, repeat=private_key)
+        pk = __scalar_multiply(point=__G, repeat=private_key)
         if not __is_on_curve(pk):
             raise ValueError
         return __compressed(pk)
@@ -173,4 +249,4 @@ def n() -> int:
 
 
 def g() -> tuple[int, int]:
-    return __BASE
+    return __G
