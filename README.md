@@ -2,7 +2,7 @@
 # Elliptic Curve Cryptography
 ### ECC
 
-ECC is commonly used for cryptology purposes. </br>
+ECC is widely used for cryptology purposes. </br>
 It focuses on asymmetric cryptography using pairs of public and private keys. </br>
 This type of cryptography is used for encryption and decryption of data, authentication, and digital signatures. <br />
 Bitcoin and other cryptocurrencies use the private key and public key for digital signatures and validating transactions.<br />
